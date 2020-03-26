@@ -185,20 +185,12 @@ class OAuth2BasicAuthenticator < Auth::ManagedAuthenticator
           if User.find_by_email(user_details[:email]).nil?
             log("not found.. create user..-------->")
             result.user = User.create(name: user_details[:name], email: user_details[:email], username: user_details[:username], active: true)
-
+            ::PluginStore.set("oauth2_basic", "oauth2_basic_user_#{user_details[:user_id]}", user_id: result.user.id)
             log("created user account")
           end
 
-          result.user = User.find_by_email(result.email)
-          log("result.user = #{result.user}")
-          log("user_details = #{user_details[:user_id]}")
-          if result.user && user_details[:user_id]
-            log("result user set pluginstore..-------->")
-            ::PluginStore.set("oauth2_basic", "oauth2_basic_user_#{user_details[:user_id]}", user_id: result.user.id)
-          end
         end
 
-        return result
       else
         # result = Auth::Result.new
         result.failed = true
@@ -225,7 +217,7 @@ register_css <<CSS
   button.btn-social.oauth2_basic {
     background-color: #6d6d6d;
   }
-  sign-up-button {
+  .sign-up-button {
     visibility: hidden;
   }
 
