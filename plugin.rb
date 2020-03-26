@@ -162,11 +162,6 @@ class OAuth2BasicAuthenticator < Auth::ManagedAuthenticator
     log("after_authenticate response: \n\ncreds: #{auth['credentials'].to_hash}\nuid: #{auth['uid']}\ninfo: #{auth['info'].to_hash}\nextra: #{auth['extra'].to_hash}")
 
     result = Auth::Result.new
-    user_details = {}
-    user_details[:user_id] = auth['uid'] if auth['uid']
-    ['name', 'username', 'email', 'email_verified', 'avatar'].each do |key|
-      user_details[key.to_sym] = auth['info'][key] if auth['info'][key]
-    end
 
     if SiteSetting.oauth2_fetch_user_details?
       if fetched_user_details = fetch_user_details(auth['credentials']['token'], auth['uid'])
@@ -176,10 +171,10 @@ class OAuth2BasicAuthenticator < Auth::ManagedAuthenticator
         ['name', 'email', 'email_verified'].each do |property|
           auth['info'][property] = fetched_user_details[property.to_sym] if fetched_user_details[property.to_sym]
         end
-
+        
         # Merge details to create user..
         log("merge details-------->")
-        user_details.merge!(fetched_user_details)
+        user_details = fetched_user_details
         current_info = ::PluginStore.get("oauth2_basic", "oauth2_basic_user_#{user_details[:user_id]}")
         if current_info
           log("current info true...-------->")
@@ -190,10 +185,13 @@ class OAuth2BasicAuthenticator < Auth::ManagedAuthenticator
           if User.find_by_email(user_details[:email]).nil?
             log("not found.. create user..-------->")
             result.user = User.create(name: user_details[:name], email: user_details[:email], username: user_details[:username], active: true)
+
             log("created user account")
           end
 
           result.user = User.find_by_email(result.email)
+          log("result.user = #{result.user}")
+          log("user_details = #{user_details[:user_id]}")
           if result.user && user_details[:user_id]
             log("result user set pluginstore..-------->")
             ::PluginStore.set("oauth2_basic", "oauth2_basic_user_#{user_details[:user_id]}", user_id: result.user.id)
