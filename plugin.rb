@@ -161,6 +161,7 @@ class OAuth2BasicAuthenticator < Auth::ManagedAuthenticator
   def after_authenticate(auth, existing_account: nil)
     log("after_authenticate response: \n\ncreds: #{auth['credentials'].to_hash}\nuid: #{auth['uid']}\ninfo: #{auth['info'].to_hash}\nextra: #{auth['extra'].to_hash}")
 
+    result = Auth::Result.new
     user_details = {}
     user_details[:user_id] = auth['uid'] if auth['uid']
     ['name', 'username', 'email', 'email_verified', 'avatar'].each do |key|
