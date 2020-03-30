@@ -1,4 +1,4 @@
-## discourse-oauth2-basic
+## FORK OF discourse-oauth2-basic
 
 This plugin allows you to use a basic OAuth2 provider as authentication for
 Discourse. It should work with many providers, with the caveat that they
@@ -10,6 +10,9 @@ very popular. If you want to use Google, Facebook or Twitter, those are
 included out of the box and you don't need this plugin. You can also
 look for other login providers in our [Github Repo](https://github.com/discourse).
 
+## Changes of this Fork
+- Create User in background at `after_authenticate` method to bypass the confirmation on first access
+- Hide the Create Account Button using CSS rule
 
 ## Usage
 
